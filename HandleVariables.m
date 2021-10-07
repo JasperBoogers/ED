@@ -18,7 +18,7 @@ c4 = 164.59;    % Ns/m, damping of upper arm-shoulder, x-direction
 c5 = 49.99;     % Ns/m, damping of upper arm-shoulder, y-direction
 ct3 = 4.9;      % Nms/rad, rotational damping of elbow
 L = 0.298;      % m, length of upper arm
-Lg = 0.6;       % m, distance between elbow and mass center of upper arm
+Lg = 0.6*L;       % m, distance between elbow and mass center of upper arm
 
 
 %% save as .mat file
