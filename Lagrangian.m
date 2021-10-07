@@ -28,7 +28,7 @@ V1 = 0.5*k1*(x1 - x0)^2; % device-palm
 V2 = 0.5*k2*(x2 - x1)^2; % palm-lower arm
 V3 = 0.5*k3*((x3 - x2)^2 + y3^2) + 0.5*kt3*theta3^2; % lower arm-elbow
 V4 = 0.5*k4*(x4^2 + y4^2) + 0.5*k5*(x4^2 + y4^2); % upper arm-shoulder
-V = V1 + V2 + V3 + V3;
+V = V1 + V2 + V3 + V4;
 
 % define dissipation
 D1 = 0.5*c1*(x1d - x0d)^2; % device-palm
@@ -42,6 +42,6 @@ Tqd = simplify(jacobian(T,qd))';
 L1 = simplify(jacobian(Tqd, t)) + simplify( jacobian(Tqd,q)*qd + jacobian(Tqd,qd) )*qdd;
 L2 = simplify( jacobian(T,q) ).';
 L3 = simplify( jacobian(V,q) ).';
-L4 = simplify( jacobian(D,q) ).';
+L4 = simplify( jacobian(D,qd) ).';
 
 EoM = L1 - L2 + L3 - L4;
