@@ -3,10 +3,12 @@ clear
 %% Constants and constraints
 
 % init variables and symbols
-load variables.mat
+S = struct2cell(load('variables.mat'));
+syms m1 m2 m3 J3g k1 k2 k3 k4 k5 kt3 c1 c2 c3 c4 c5 ct3 L Lg
 syms x0 x1 x2 x3 y3 theta3 t
 syms x0d x1d x2d x3d y3d theta3d 
 syms x1dd x2dd x3dd y3dd theta3dd
+var = [m1; m2; m3; J3g; k1; k2; k3; k4; k5; kt3; c1; c2; c3; c4; c5; ct3; L; Lg];
 
 % define generalized coordinates vectors
 q = [x1; x2; x3; y3; theta3];
@@ -48,7 +50,7 @@ D = D1 + D2 + D3 + D4;
 
 %% Lagrangian --> EoM
 
-Tqd = simplify(jacobian(T,qd))';
+Tqd = simplify(jacobian(T,qd)).';
 L1 = simplify(jacobian(Tqd, t)) + simplify( jacobian(Tqd,q)*qd + jacobian(Tqd,qd)*qdd );
 L2 = simplify( jacobian(T,q) ).';
 L3 = simplify( jacobian(V,q) ).';
@@ -61,15 +63,16 @@ M = simplify(jacobian(L1-L2, qdd));
 C = simplify(jacobian(L1-L2-L4, qd));
 K = simplify(jacobian(L1-L2+L3-L4, q));
 
-M_eq = substitute(M, q, qd, qdd, q_eq, qd_eq, qdd_eq);
-C_eq = substitute(C, q, qd, qdd, q_eq, qd_eq, qdd_eq);
-K_eq = substitute(K, q, qd, qdd, q_eq, qd_eq, qdd_eq);
+M_eq = subs_eq(M, q, qd, qdd, q_eq, qd_eq, qdd_eq);
+C_eq = subs_eq(C, q, qd, qdd, q_eq, qd_eq, qdd_eq);
+K_eq = subs_eq(K, q, qd, qdd, q_eq, qd_eq, qdd_eq);
 
-Lin_EoM = M_eq*qdd + C_eq*qd + K_eq*q
+Lin_EoM = M_eq*qdd + C_eq*qd + K_eq*q;
+
 %% functions
 
-function [res] = substitute(mat, v, vd, vdd, v_eq, vd_eq, vdd_eq)
+function [res] = subs_eq(mat, v, vd, vdd, v_eq, vd_eq, vdd_eq)
    r1 = subs(mat, v, v_eq);
    r2 = subs(r1, vd, vd_eq);
-   res = subs(r2, vdd, vdd_eq);
+   res = simplify( subs(r2, vdd, vdd_eq) );
 end
