@@ -5,20 +5,30 @@ clear
 % init variables and symbols
 S = struct2cell(load('variables.mat'));
 syms m1 m2 m3 J3g k1 k2 k3 k4 k5 kt3 c1 c2 c3 c4 c5 ct3 L Lg
+var = [m1; m2; m3; J3g; k1; k2; k3; k4; k5; kt3; c1; c2; c3; c4; c5; ct3; L; Lg];
+
+% define generalized coordinates and derivatives
 syms x0 x1 x2 x3 y3 theta3 t
 syms x0d x1d x2d x3d y3d theta3d 
 syms x1dd x2dd x3dd y3dd theta3dd
-var = [m1; m2; m3; J3g; k1; k2; k3; k4; k5; kt3; c1; c2; c3; c4; c5; ct3; L; Lg];
 
-% define generalized coordinates vectors
 q = [x1; x2; x3; y3; theta3];
 qd = [x1d; x2d; x3d; y3d; theta3d];
 qdd = [x1dd; x2dd; x3dd; y3dd; theta3dd];
 
-% equilibrium vectors
+% define equilibrium vectors
 q_eq = [0; 0; 0; 0; pi/2];
 qd_eq = [0; 0; 0; 0; 0;];
 qdd_eq = [0; 0; 0; 0; 0;];
+
+% define linearized coordinates and derivatives
+syms x1_ x2_ x3_ y3_ theta3_
+syms x1d_ x2d_ x3d_ y3d_ theta3d_
+syms x1dd_ x2dd_ x3dd_ y3dd_ theta3dd_
+
+q_ = [x1_; x2_; x3_; y3_; theta3_];
+qd_ = [x1d_; x2d_; x3d_; y3d_; theta3d_];
+qdd_ = [x1dd_; x2dd_; x3dd_; y3dd_; theta3dd_];
 
 % define constraints and corresponding derivatives
 x4 = x3 + L*cos(theta3);
@@ -59,15 +69,15 @@ L4 = simplify( jacobian(D,qd) ).';
 EoM = L1 - L2 + L3 + L4;
 
 %% Linearization
-M = simplify(jacobian(L1-L2, qdd));
-C = simplify(jacobian(L1-L2-L4, qd));
-K = simplify(jacobian(L1-L2+L3-L4, q));
+M = simplify(jacobian(EoM, qdd));
+C = simplify(jacobian(EoM, qd));
+K = simplify(jacobian(EoM, q));
 
 M_eq = subs_eq(M, q, qd, qdd, q_eq, qd_eq, qdd_eq);
 C_eq = subs_eq(C, q, qd, qdd, q_eq, qd_eq, qdd_eq);
 K_eq = subs_eq(K, q, qd, qdd, q_eq, qd_eq, qdd_eq);
 
-Lin_EoM = M_eq*qdd + C_eq*qd + K_eq*q;
+Lin_EoM = M_eq*qdd_ + C_eq*qd_ + K_eq*q_;
 
 %% functions
 
