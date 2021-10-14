@@ -79,6 +79,12 @@ K_eq = subs_eq(K, q, qd, qdd, q_eq, qd_eq, qdd_eq);
 
 Lin_EoM = M_eq*qdd_ + C_eq*qd_ + K_eq*q_;
 
+
+% possible solutions for generalized force vector
+Q1 = [jacobian(EoM, x0), jacobian(EoM, x0d) ];
+Q2 = simplify(-jacobian(V, q) - jacobian(D, qd)).';
+Q2 = subs_eq(Q2, q, qd, qdd, q_eq, qd_eq, qdd_eq); % does have some weird terms at 4th and 5th index
+
 %% functions
 
 function [res] = subs_eq(mat, v, vd, vdd, v_eq, vd_eq, vdd_eq)
