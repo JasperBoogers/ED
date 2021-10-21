@@ -64,13 +64,13 @@ Tqd = simplify(jacobian(T,qd)).';
 L1 = simplify(jacobian(Tqd, t)) + simplify( jacobian(Tqd,q)*qd + jacobian(Tqd,qd)*qdd );
 L2 = simplify( jacobian(T,q) ).';
 L3 = simplify( jacobian(V,q) ).';
-L4 = simplify( jacobian(D,qd) ).';
+L4 = -simplify( jacobian(D,qd) ).';
 
-EoM = L1 - L2 + L3 + L4;
+EoM = L1 - L2 + L3 - L4;
 
 %% Linearization
-M = simplify(jacobian(EoM, qdd));
-C = simplify(jacobian(EoM, qd));
+M = simplify(jacobian(L1 - L2, qdd));
+C = simplify(jacobian(L1 - L2 - L4, qd));
 K = simplify(jacobian(EoM, q));
 
 M_eq = subs_eq(M, q, qd, qdd, q_eq, qd_eq, qdd_eq);
@@ -80,8 +80,8 @@ K_eq = subs_eq(K, q, qd, qdd, q_eq, qd_eq, qdd_eq);
 Lin_EoM = M_eq*qdd_ + C_eq*qd_ + K_eq*q_;
 
 % possible solution for generalized force vector
-Q2 = simplify(-jacobian(V, q) + -jacobian(D, qd)).';
-Q2 = subs_eq(Q2, q, qd, qdd, q_eq, qd_eq, qdd_eq);
+Q = simplify(-jacobian(V, q) + -jacobian(D, qd)).';
+Q = subs_eq(Q, q, qd, qdd, q_eq, qd_eq, qdd_eq);
 
 %% Eigenmodes
 Kv = double(subs(K_eq,var,S));
