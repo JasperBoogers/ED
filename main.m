@@ -80,14 +80,16 @@ K_eq = subs_eq(K, q, qd, qdd, q_eq, qd_eq, qdd_eq);
 Lin_EoM = M_eq*qdd_ + C_eq*qd_ + K_eq*q_;
 
 % possible solution for generalized force vector
-Q2 = simplify(jacobian(V, q) + jacobian(D, qd)).';
+Q2 = simplify(-jacobian(V, q) + -jacobian(D, qd)).';
 Q2 = subs_eq(Q2, q, qd, qdd, q_eq, qd_eq, qdd_eq);
 
 %% Eigenmodes
-
+Kv = double(subs(K_eq,var,S));
+Mv = double(subs(M_eq,var,S));
+[eigenmodes,eigenfreq]=eig(Kv,Mv);
+omega = sqrt(diag(eigenfreq));
 
 %% functions
-
 function [res] = subs_eq(mat, v, vd, vdd, v_eq, vd_eq, vdd_eq)
    r1 = subs(mat, v, v_eq);
    r2 = subs(r1, vd, vd_eq);
