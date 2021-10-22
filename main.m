@@ -17,7 +17,7 @@ qd = [x1d; x2d; x3d; y3d; theta3d];
 qdd = [x1dd; x2dd; x3dd; y3dd; theta3dd];
 
 % define equilibrium vectors
-q_eq = [0; 0; 0; 0; pi/2];
+q_eq = [0; 0; 0; 0; 0];
 qd_eq = [0; 0; 0; 0; 0;];
 qdd_eq = [0; 0; 0; 0; 0;];
 
@@ -83,11 +83,37 @@ Lin_EoM = M_eq*qdd_ + C_eq*qd_ + K_eq*q_;
 Q2 = simplify(-jacobian(V, q) + -jacobian(D, qd)).';
 Q2 = subs_eq(Q2, q, qd, qdd, q_eq, qd_eq, qdd_eq);
 
-%% Eigenmodes
+%% Eigenmodes 
+% No damping
 Kv = double(subs(K_eq,var,S));
 Mv = double(subs(M_eq,var,S));
-[eigenmodes,eigenfreq]=eig(Kv,Mv);
+Cv = double(subs(C_eq,var,S));
+[X,eigenfreq]=eig(Kv,Mv);
 omega = sqrt(diag(eigenfreq));
+
+% Damping
+% Good approximation/ allowed if:
+% 1 lightly damped
+% 2 Eigenfrequencies well seperated
+Beta = X'*Cv.*X;
+for k = 1:size(X)
+    Gamma(k) = transpose(X(:,k))*Kv*X(:,k);
+    Mu(k) = transpose(X(:,k))*Mv*X(:,k);
+    lambdaD = -0.5*diag(Beta)/Mu(k) + 1i*omega;
+end
+
+alpha = zeros(5);
+for k = 1:size(X)
+    for s=1:size(X)
+        if (k~=s)
+            alpha(:,k) = alpha(:,k) + 1i.*omega(k).*Beta(k,s).*X(:,s)/(Mu(s).*(omega(k)^2-omega(s)^2));
+        else
+           % do nothing
+        end
+    end
+end
+Z = X + alpha;
+
 
 %% functions
 function [res] = subs_eq(mat, v, vd, vdd, v_eq, vd_eq, vdd_eq)
