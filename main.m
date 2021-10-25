@@ -96,6 +96,8 @@ omega = sqrt(diag(eigenfreq));
 % 1 lightly damped
 % 2 Eigenfrequencies well seperated
 Beta = X'*Cv.*X;
+Mu = zeros(1,5);
+Gamma = zeros(1,5);
 for k = 1:size(X)
     Gamma(k) = transpose(X(:,k))*Kv*X(:,k);
     Mu(k) = transpose(X(:,k))*Mv*X(:,k);
