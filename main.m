@@ -96,12 +96,15 @@ omega = sqrt(diag(eigenfreq));
 % 1 lightly damped
 % 2 Eigenfrequencies well seperated
 Beta = X'*Cv.*X;
-Mu = zeros(1,5);
-Gamma = zeros(1,5);
+Mu = zeros(5,1);
+Gamma = zeros(5,1);
+Eps = zeros(5,1);
+
 for k = 1:size(X)
     Gamma(k) = transpose(X(:,k))*Kv*X(:,k);
     Mu(k) = transpose(X(:,k))*Mv*X(:,k);
     lambdaD = -0.5*diag(Beta)/Mu(k) + 1i*omega;
+    Eps(k) = diag(Beta(k,k))/(2*omega(k)*Mu(k));
 end
 
 alpha = zeros(5);
@@ -115,6 +118,8 @@ for k = 1:size(X)
     end
 end
 Z = X + alpha;
+
+
 
 
 %% functions
