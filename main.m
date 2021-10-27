@@ -30,12 +30,17 @@ q_ = [x1_; x2_; x3_; y3_; theta3_];
 qd_ = [x1d_; x2d_; x3d_; y3d_; theta3d_];
 qdd_ = [x1dd_; x2dd_; x3dd_; y3dd_; theta3dd_];
 theta0= pi/2;
+
 % define constraints and corresponding derivatives
-%x4 = x3 + L*cos(theta3);
 x4 = x3 + L*cos(theta3+theta0);
 x4d = x3d - L*theta3d*sin(theta3+theta0);
 y4 = y3 + L*sin(theta3+theta0)-L*sin(theta0);
 y4d = y3d + L*theta3d*cos(theta3+theta0);
+
+x5 = x3 + Lg*cos(theta3+theta0);
+x5d = x3d - Lg*theta3d*sin(theta3+theta0);
+y5 = y3 + Lg*sin(theta3+theta0)-L*sin(theta0);
+y5d = y3d + Lg*theta3d*cos(theta3+theta0);
 
 %% Energies
 
@@ -44,14 +49,14 @@ y4d = y3d + L*theta3d*cos(theta3+theta0);
 % Kinetic energy
 T1 = 0.5*m1*x1d^2; % wrist
 T2 = 0.5*m2*x2d^2; % lower arm
-T3 = 0.5*m3*x3d^2 + 0.5*m3*y3d^2 + 0.5*(J3g + m3*Lg^2)*theta3d^2; % upper arm
+T3 = 0.5*m3*x5d^2 + 0.5*m3*y5d^2 + 0.5*J3g*theta3d^2; % upper arm
 T = T1 + T2 + T3;
 
 % Potential energy
 V1 = 0.5*k1*(x1 - x0)^2; % device-palm
 V2 = 0.5*k2*(x2 - x1)^2; % palm-lower arm
 V3 = 0.5*k3*(x3 - x2)^2 + 0.5*kt3*(theta3)^2; % lower arm-elbow
-V4 = 0.5*k4*(x4^2 + y4^2) + 0.5*k5*(x4^2 + y4^2); % upper arm-shoulder
+V4 = 0.5*k4*x4^2 + 0.5*k5*y4^2; % upper arm-shoulder
 V = V1 + V2 + V3 + V4;
 
 % Dissipation energy
@@ -87,42 +92,49 @@ Q = simplify(-jacobian(V, q) + -jacobian(D, qd)).';
 Q = subs_eq(Q, q, qd, qdd, q_eq, qd_eq, qdd_eq);
 
 %% Eigenmodes 
-% No damping
+
+% insert variables
 Kv = double(subs(K_eq,var,S));
 Mv = double(subs(M_eq,var,S));
 Cv = double(subs(C_eq,var,S));
+
+% Case 1: no damping
 [X,eigenfreq]=eig(Kv,Mv);
 omega = sqrt(diag(eigenfreq));
 f = omega/(2*pi);
-% Damping
-[XD,omegad]=polyeig(Kv,Cv,Mv);
+
+% Case 2: damping
 % Good approximation/ allowed if:
 % 1 lightly damped
 % 2 Eigenfrequencies well seperated
-Beta = X'*Cv.*X;
+
+[XD,omegad]=polyeig(Kv,Cv,Mv);
+
+Beta = zeros(5,1);
 Mu = zeros(5,1);
 Gamma = zeros(5,1);
+lambdaD = zeros(5,1);
 Eps = zeros(5,1);
 
-
 for k = 1:size(X)
+    Beta(k) = X(:,k)'*Cv*X(:,k);
     Gamma(k) = transpose(X(:,k))*Kv*X(:,k);
     Mu(k) = transpose(X(:,k))*Mv*X(:,k);
-    lambdaD = -0.5*diag(Beta)/Mu(k) + 1i*omega;
-    Eps(k) = diag(Beta(k,k))/(2*omega(k)*Mu(k));
+    lambdaD(k) = -0.5*Beta(k)/Mu(k) + 1i*omega(k);
+    Eps(k) = diag(Beta(k))/(2*omega(k)*Mu(k));
 end
 
-alpha = zeros(5);
-for k = 1:size(X)
-    for s=1:size(X)
-        if (k~=s)
-            alpha(:,k) = alpha(:,k) + 1i.*omega(k).*Beta(k,s).*X(:,s)/(Mu(s).*(omega(k)^2-omega(s)^2));
-        else
-           % do nothing
-        end
-    end
-end
-Z = X + alpha;
+% alpha = zeros(5);
+% for k = 1:size(X)
+%     for s=1:size(X)
+%         if (k~=s)
+%             alpha(:,k) = alpha(:,k) + 1i.*omega(k).*Beta(k,s).*X(:,s)/(Mu(s).*(omega(k)^2-omega(s)^2));
+%         else
+%            % do nothing
+%         end
+%     end
+% end
+% Z = X + alpha;
 
 
 
