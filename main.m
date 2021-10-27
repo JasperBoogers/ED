@@ -6,6 +6,7 @@ clc,clear all
 S = variables();
 syms m1 m2 m3 J3g k1 k2 k3 k4 k5 kt3 c1 c2 c3 c4 c5 ct3 L Lg
 var = [m1; m2; m3; J3g; k1; k2; k3; k4; k5; kt3; c1; c2; c3; c4; c5; ct3; L; Lg];
+theta0 = pi/2;
 
 % define generalized coordinates and derivatives
 syms x0 x1 x2 x3 y3 theta3 t
@@ -29,22 +30,22 @@ syms x1dd_ x2dd_ x3dd_ y3dd_ theta3dd_
 q_ = [x1_; x2_; x3_; y3_; theta3_];
 qd_ = [x1d_; x2d_; x3d_; y3d_; theta3d_];
 qdd_ = [x1dd_; x2dd_; x3dd_; y3dd_; theta3dd_];
-theta0= pi/2;
 
-% define constraints and corresponding derivatives
+%% Constraints
+
+% shoulder to elbow
 x4 = x3 + L*cos(theta3+theta0);
 x4d = x3d - L*theta3d*sin(theta3+theta0);
 y4 = y3 + L*sin(theta3+theta0)-L*sin(theta0);
 y4d = y3d + L*theta3d*cos(theta3+theta0);
 
+% CoM of upper arm to elbow
 x5 = x3 + Lg*cos(theta3+theta0);
 x5d = x3d - Lg*theta3d*sin(theta3+theta0);
-y5 = y3 + Lg*sin(theta3+theta0)-L*sin(theta0);
+y5 = y3 + Lg*sin(theta3+theta0)-Lg*sin(theta0);
 y5d = y3d + Lg*theta3d*cos(theta3+theta0);
 
 %% Energies
-
-%check potential and generalized coordinates
 
 % Kinetic energy
 T1 = 0.5*m1*x1d^2; % wrist
@@ -87,7 +88,7 @@ K_eq = subs_eq(K, q, qd, qdd, q_eq, qd_eq, qdd_eq);
 
 Lin_EoM = M_eq*qdd_ + C_eq*qd_ + K_eq*q_;
 
-% possible solution for generalized force vector
+% generalized force vector
 Q = simplify(-jacobian(V, q) + -jacobian(D, qd)).';
 Q = subs_eq(Q, q, qd, qdd, q_eq, qd_eq, qdd_eq);
 
@@ -135,9 +136,6 @@ end
 %     end
 % end
 % Z = X + alpha;
-
-
-
 
 %% functions
 function [res] = subs_eq(mat, v, vd, vdd, v_eq, vd_eq, vdd_eq)
