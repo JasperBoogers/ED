@@ -3,7 +3,7 @@ clc,clear all
 %% Constants and constraints
 
 % init variables and symbols
-S = variables();
+S = get_variables();
 syms m1 m2 m3 J3g k1 k2 k3 k4 k5 kt3 c1 c2 c3 c4 c5 ct3 L Lg
 var = [m1; m2; m3; J3g; k1; k2; k3; k4; k5; kt3; c1; c2; c3; c4; c5; ct3; L; Lg];
 theta0 = pi/2;
@@ -100,42 +100,27 @@ Mv = double(subs(M_eq,var,S));
 Cv = double(subs(C_eq,var,S));
 
 % Case 1: no damping
-[X,eigenfreq]=eig(Kv,Mv);
-omega = sqrt(diag(eigenfreq));
-f = omega/(2*pi);
+[X,lambda]=eig(Kv,Mv);
+lambda = sqrt(diag(lambda));
+omega = lambda/(2*pi);
 
 % Case 2: damping
 % Good approximation/ allowed if:
 % 1 lightly damped
 % 2 Eigenfrequencies well seperated
 
-[XD,omegad]=polyeig(Kv,Cv,Mv);
+[XD,lambdaD]=polyeig(Kv,Cv,Mv);
+omegaD = lambdaD/(2*pi);
 
 Beta = zeros(5,1);
 Mu = zeros(5,1);
-Gamma = zeros(5,1);
-lambdaD = zeros(5,1);
 Eps = zeros(5,1);
 
 for k = 1:size(X)
     Beta(k) = X(:,k)'*Cv*X(:,k);
-    Gamma(k) = transpose(X(:,k))*Kv*X(:,k);
     Mu(k) = transpose(X(:,k))*Mv*X(:,k);
-    lambdaD(k) = -0.5*Beta(k)/Mu(k) + 1i*omega(k);
-    Eps(k) = diag(Beta(k))/(2*omega(k)*Mu(k));
+    Eps(k) = Beta(k)/(2*omega(k)*Mu(k));
 end
-
-% alpha = zeros(5);
-% for k = 1:size(X)
-%     for s=1:size(X)
-%         if (k~=s)
-%             alpha(:,k) = alpha(:,k) + 1i.*omega(k).*Beta(k,s).*X(:,s)/(Mu(s).*(omega(k)^2-omega(s)^2));
-%         else
-%            % do nothing
-%         end
-%     end
-% end
-% Z = X + alpha;
 
 %% functions
 function [res] = subs_eq(mat, v, vd, vdd, v_eq, vd_eq, vdd_eq)
@@ -144,7 +129,7 @@ function [res] = subs_eq(mat, v, vd, vdd, v_eq, vd_eq, vdd_eq)
    res = simplify( subs(r2, vdd, vdd_eq) );
 end
 
-function [S] = variables()
+function [S] = get_variables()
 %% list of all variables
 m1 = 0.45;      % kg, mass of palm
 m2 = 1.15;      % kg, mass of lower arm
