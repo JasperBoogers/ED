@@ -101,8 +101,7 @@ Cv = double(subs(C_eq,var,S));
 
 % Case 1: no damping
 [X,lambda]=eig(Kv,Mv);
-lambda = sqrt(diag(lambda));
-omega = lambda/(2*pi);
+omega = sqrt(diag(lambda))/(2*pi);
 
 % Case 2: damping
 % Good approximation/ allowed if:
