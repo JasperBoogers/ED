@@ -99,17 +99,19 @@ Kv = double(subs(K_eq,var,S));
 Mv = double(subs(M_eq,var,S));
 Cv = double(subs(C_eq,var,S));
 
+
 % Case 1: no damping
-[X,lambda]=eig(Kv,Mv);
-omega = sqrt(diag(lambda))/(2*pi);
+[X,omegasquare]=eig(Kv,Mv);
+omega = sqrt(diag(omegasquare));
+freq = omega/(2*pi);
 
 % Case 2: damping
+[Xd,lambdad]=polyeig(Kv,Cv,Mv);
+freqd = imag(lambdad)/(2*pi);
+
 % Good approximation/ allowed if:
 % 1 lightly damped
 % 2 Eigenfrequencies well seperated
-
-[XD,lambdaD]=polyeig(Kv,Cv,Mv);
-omegaD = lambdaD/(2*pi);
 
 Beta = zeros(5,1);
 Mu = zeros(5,1);
