@@ -1,12 +1,11 @@
-clc,clear all
+clc,clear
 
 %% Constants and constraints
 
 % init variables and symbols
 S = get_variables();
-syms m1 m2 m3 J3g k1 k2 k3 k4 k5 kt3 c1 c2 c3 c4 c5 ct3 L Lg
+syms m1 m2 m3 J3g k1 k2 k3 k4 k5 kt3 c1 c2 c3 c4 c5 ct3 L Lg theta0
 var = [m1; m2; m3; J3g; k1; k2; k3; k4; k5; kt3; c1; c2; c3; c4; c5; ct3; L; Lg];
-theta0 = pi/2;
 
 % define generalized coordinates and derivatives
 syms x0 x1 x2 x3 y3 theta3 t
@@ -82,9 +81,9 @@ M = simplify(jacobian(L1 - L2, qdd));
 C = simplify(jacobian(L1 - L2 - L4, qd));
 K = simplify(jacobian(EoM, q));
 
-M_eq = subs_eq(M, q, qd, qdd, q_eq, qd_eq, qdd_eq);
-C_eq = subs_eq(C, q, qd, qdd, q_eq, qd_eq, qdd_eq);
-K_eq = subs_eq(K, q, qd, qdd, q_eq, qd_eq, qdd_eq);
+M_eq = subs_eq(M, q, qd, qdd, q_eq, qd_eq, qdd_eq); M_eq = subs(M_eq, theta0, pi/2);
+C_eq = subs_eq(C, q, qd, qdd, q_eq, qd_eq, qdd_eq); C_eq = subs(C_eq, theta0, pi/2);
+K_eq = subs_eq(K, q, qd, qdd, q_eq, qd_eq, qdd_eq); K_eq = subs(K_eq, theta0, pi/2);
 
 Lin_EoM = M_eq*qdd_ + C_eq*qd_ + K_eq*q_;
 
